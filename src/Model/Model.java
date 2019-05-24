@@ -42,12 +42,16 @@ public class Model extends Observable
     
     public void sendStatement(String statement) throws SQLStatementException
     {
+        long a = System.nanoTime();
         this.connector.executeStatement(statement);
+        long z = System.nanoTime() - a;
         if(this.connector.getErrorMessage() != null)
                 throw new SQLStatementException("Fehler beim Ausführen des Statements: " + this.connector.getErrorMessage());
         
         this.qresult = this.connector.getCurrentQueryResult();
         this.notifyObs();
+        this.setChanged();
+        this.notifyObservers(z);
     }
     
     private void meldeTimeout(int timeout)
@@ -72,7 +76,7 @@ public class Model extends Observable
             for(int i = 0; i < u.length; i++)
             {
                 ausgabe += u[i];
-                for(int z = 0; z < 17 - u[i].length(); z++)
+                for(int z = 0; z < 23 - u[i].length(); z++)
                     ausgabe += " ";
             }
             
@@ -82,7 +86,7 @@ public class Model extends Observable
                 for(int j = 0; j < data[i].length; j++)
                 {
                     ausgabe += data[i][j];
-                    for(int z = 0; z <  17 - data[i][j].length(); z++)
+                    for(int z = 0; z <  23 - data[i][j].length(); z++)
                         ausgabe += " ";
                 }
             }
@@ -129,12 +133,7 @@ public class Model extends Observable
                         this.wait(500);
                     }
                     
-                    if(this.connector.getConnection() != null && this.connector.getConnection().isValid(3))
-                    {
-                        this.checkTimeout();
-                        this.model.meldeTimeout(this.lastTimeout);
-                    }
-                    else
+                    if(this.connector.getConnection() != null && !this.connector.getConnection().isValid(3))
                         this.model.meldeServerTimeout();
                     
                 }
@@ -144,18 +143,6 @@ public class Model extends Observable
                 }
             }
         }
-        
-        private void checkTimeout()
-        {
-            try
-            {
-                this.lastTimeout = this.connector.getConnection().getNetworkTimeout();
-            }
-            catch (SQLException e)
-            {
-                e.printStackTrace();
-            }
-        } 
     }
     
 }
