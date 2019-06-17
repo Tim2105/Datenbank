@@ -231,7 +231,7 @@ public class View extends javax.swing.JFrame implements Observer
         }
         catch(SQLStatementException e)
         {
-            this.textareaerror.setText("Ein Fehler ist aufgetreten: " + e.getMessage());
+            this.textareaerror.setText(e.getMessage());
         }
         catch(StatementDeniedException e)
         {
@@ -248,10 +248,10 @@ public class View extends javax.swing.JFrame implements Observer
             if(obj.equals("/timeout/"))
                 this.textareaping.setText("Zeitüberschreitung bei der Verbindung(3000 Millisekunden)");
         }
-        else if(arg instanceof Integer)
+        else if(arg instanceof Long)
         {
-            int obj = (int)arg;
-            this.textareaping.setText("Ping zum Server: " + Integer.toString(obj));
+            long obj = (long)arg;
+            this.textareaping.setText("Ping zum Server: " + Long.toString(obj) + " Millisekunden\n(gemessen an der letzten Abfrage)");
         }
         else
         {
