@@ -3,7 +3,6 @@ package Model;
 import Datenbank.*;
 import java.util.Observable;
 import dbklassen.*;
-import java.sql.SQLException;
 
 public class Model extends Observable
 {
@@ -12,17 +11,12 @@ public class Model extends Observable
     public static final int port = 3306;
     private DatabaseConnectorMySQL connector;
     private QueryResult qresult;
-    ConnectionChecker cchecker;
     
     public Model() throws ConnectionFailureException
     {
         this.connector = new DatabaseConnectorMySQL(ip, port, "tim", "tim", "Tim2003!");
         if(this.connector.getErrorMessage() != null)
             throw new ConnectionFailureException("Die Verbindung konnte nicht hergestellt werden");
-        
-        this.cchecker = new ConnectionChecker(this, this.connector);
-        Thread thread = new Thread(this.cchecker);
-        thread.start();
     }
     
     public void verifyAndSendStatement(String statement) throws StatementDeniedException, SQLStatementException
@@ -42,19 +36,18 @@ public class Model extends Observable
     
     public void sendStatement(String statement) throws SQLStatementException
     {
-        long a = System.nanoTime();
+        long a = System.currentTimeMillis();
         this.connector.executeStatement(statement);
-        long z = System.nanoTime() - a;
+        long z = System.currentTimeMillis() - a;
         if(this.connector.getErrorMessage() != null)
                 throw new SQLStatementException("Fehler beim Ausführen des Statements: " + this.connector.getErrorMessage());
         
         this.qresult = this.connector.getCurrentQueryResult();
         this.notifyObs();
-        this.setChanged();
-        this.notifyObservers(z);
+        this.meldeTimeout(z);
     }
     
-    private void meldeTimeout(int timeout)
+    private void meldeTimeout(long timeout)
     {
         this.setChanged();
         this.notifyObservers(timeout);
@@ -105,44 +98,6 @@ public class Model extends Observable
     {
         this.setChanged();
         this.notifyObservers();
-    }
-    
-    private class ConnectionChecker implements Runnable
-    {
-        
-        Model model;
-        DatabaseConnectorMySQL connector;
-        int lastTimeout;
-        
-        public ConnectionChecker(Model model, DatabaseConnectorMySQL connector)
-        {
-            this.model = model;
-            this.connector = connector;
-            this.lastTimeout = 0;
-        }
-
-        @Override
-        public void run()
-        {
-            while(true)
-            {
-                try
-                {
-                    synchronized(this)
-                    {
-                        this.wait(500);
-                    }
-                    
-                    if(this.connector.getConnection() != null && !this.connector.getConnection().isValid(3))
-                        this.model.meldeServerTimeout();
-                    
-                }
-                catch(InterruptedException | SQLException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }
     }
     
 }
