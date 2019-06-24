@@ -9,6 +9,15 @@ public class Model extends Observable
     
     public static final String ip = "10.16.0.3";
     public static final int port = 3306;
+    
+    private final String s1 = "SELECT * FROM Polizist";
+    private final String s2 = "SELECT * FROM Straftaeter";
+    private final String s3 = "SELECT * FROM Ordnungswidrigkeit";
+    private final String s4 = "SELECT * FROM Rang";
+    private final String s5 = "SELECT * FROM Strafzelle";
+    private final String s6 = "SELECT OName, OVorname, Ordnungswidrigkeit, Datum, Geldstrafe FROM Ordnungswidrigkeit WHERE OName = 'Neumann' AND OVorname = 'Marvin'";
+    private final String s7 = "SELECT Polizist.Name, Polizist.Vorname, Rang.Gehaltshoehe FROM Polizist JOIN Rang ON Polizist.Rang = Rang.Rang";
+    
     private DatabaseConnectorMySQL connector;
     private QueryResult qresult;
     
@@ -21,6 +30,39 @@ public class Model extends Observable
     
     public void verifyAndSendStatement(String statement) throws StatementDeniedException, SQLStatementException
     {
+        
+        //auf Nummer eines Statements überprüfen//
+        switch (statement)
+        {
+            case "1":
+                this.sendStatement(this.s1);
+                return;
+            case "2":
+                this.sendStatement(this.s2);
+                return;
+            case "3":
+                this.sendStatement(this.s3);
+                return;
+            case "4":
+                this.sendStatement(this.s4);
+                return;
+            case "5":
+                this.sendStatement(this.s5);
+                return;
+            case "6":
+                this.sendStatement(this.s6);
+                return;
+            case "7":
+                this.sendStatement(this.s7);
+                return;
+            default:
+                break;
+        }
+        
+        ////////////////////////
+        
+        //auf Datenbankveränderung überprüfen//
+        
         String s = statement.toUpperCase();
         if(s.contains("DELETE"))
             throw new StatementDeniedException("Ungenehmigte Operation gefunden - 'DELETE'");
@@ -30,6 +72,8 @@ public class Model extends Observable
             throw new StatementDeniedException("Ungenehmigte Operation gefunden - 'UPDATE'");
         if(s.contains("INSERT"))
             throw new StatementDeniedException("Ungenehmigte Operation gefunden - 'INSERT'");
+        
+        ////////////////////////////////////////
         
         this.sendStatement(statement);
     }
