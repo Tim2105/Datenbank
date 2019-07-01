@@ -1,6 +1,5 @@
 package Datenbank;
 
-
 public class SQLStatementException extends Exception
 {
     
