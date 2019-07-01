@@ -242,13 +242,7 @@ public class View extends javax.swing.JFrame implements Observer
     @Override
     public void update(Observable o, Object arg) 
     {
-        if(arg instanceof String)
-        {
-            String obj = (String)arg;
-            if(obj.equals("/timeout/"))
-                this.textareaping.setText("Zeitüberschreitung bei der Verbindung(3000 Millisekunden)");
-        }
-        else if(arg instanceof Long)
+        if(arg instanceof Long)
         {
             long obj = (long)arg;
             this.textareaping.setText("Ping zum Server: " + Long.toString(obj) + " Millisekunden\n(gemessen an der letzten Abfrage)");
